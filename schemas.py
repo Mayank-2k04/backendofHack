@@ -9,3 +9,10 @@ class User(BaseModel):
 class UserLogin(BaseModel):
     email: EmailStr
     password: str
+
+class LostItemSchema(BaseModel):
+    title: str
+    description: Optional[str]
+    latitude: float
+    longitude: float
+    image_url: Optional[str] = None
