@@ -1,13 +1,11 @@
 import smtplib, ssl
 import random
 import os
-from db import alerts, found_items, logs
+from db import alerts, found_items, logs, requests
 from bson import ObjectId
 from datetime import datetime, timedelta, timezone
 from fastapi import HTTPException
 import traceback
-
- # Change if using another provider
 
 SENDER_EMAIL ="pythonsendsmail8@gmail.com"
 SMTP_HOST = os.getenv("SMTP_HOST", "smtp.gmail.com")
@@ -74,8 +72,16 @@ def verify_any_otp_and_log(ot: str):
 
     item_id = record["item_id"]
 
-
     found_items.delete_one({"_id": ObjectId(item_id)})
+
+    req = requests.find_one({"item_id": ObjectId(item_id)})
+    if not req:
+        raise HTTPException(status_code=404, detail="No request found for this item")
+
+    requests.update_one(
+        {"_id": req["_id"]},
+        {"$set": {"status": "completed", "completed_at": now}}
+    )
 
     logs.insert_one({
         "item_id": str(item_id),
@@ -89,8 +95,50 @@ def verify_any_otp_and_log(ot: str):
 
     return {"message": "OTP verified, item removed from lost/found collections, and logged successfully!"}
 
+
+def send_claim_request(item_id: str, claimer_email: str, finder_email: str):
+    sslcontext = ssl.create_default_context()
+    msg_body = f"""Hello,
+
+    You have a new request regarding your found item (ID: {item_id}).
+
+    Claimer Email: {claimer_email}
+
+    Please coordinate securely through the platform for OTP verification.
+    
+    
+    """
+    message = f"""From: Foundry team <{SENDER_EMAIL}>
+    To: {finder_email}
+    Subject: Claimer found
+
+    {msg_body}
+    Regards,
+    Foundry Team
+    """
+
+    try:
+        with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT, context=sslcontext) as server:
+            server.login(SENDER_EMAIL, SENDER_PASSWORD)
+            server.sendmail(SENDER_EMAIL, finder_email, message)
+
+        # Save request in DB
+        requests.insert_one({
+            "item_id": ObjectId(item_id),
+            "claimer_email": claimer_email,
+            "finder_email": finder_email,
+            "status": "pending",
+            "requested_at": datetime.now(timezone.utc)
+        })
+
+        return {"status": "success", "message": "Request sent to finder"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to send request: {str(e)}")
+
+
+
 if __name__ == "__main__":
-    pass
     # otp = generate_otp()
-    # print(send_otp_email("68d0279784c250badf2e388b","flkutdjryhdbgvc ","mayank.kapoor2607@gmail.com",otp))
+    pass
+    #print(send_claim_request("68d0279784c250badf2e388b","mayank.kapoor@gmail.com","mayank.kapoor2607@gmail.com"))
     # print(verify_any_otp_and_log("751033"))
