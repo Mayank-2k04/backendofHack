@@ -45,9 +45,9 @@ Foundry Team
             upsert=True
         )
 
-        return True
+        return {"status" : "Success"}
     except Exception:
-        return False
+        return {"status" : "Not sent"}
 
 def verify_any_otp_and_log(ot: str):
 
