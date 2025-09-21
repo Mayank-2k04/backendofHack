@@ -28,7 +28,7 @@ def login(user : UserLogin):
     if not db_user or not functions.verify_password(user.password, db_user["password"]):
         raise HTTPException(status_code=400, detail="Invalid email or password")
 
-    token = create_access_token(data={"sub": str(db_user["_id"]), "email": user.email},
+    token = create_access_token(data={"sub": str(db_user["_id"]), "email": user.email, "name": db_user["name"]},
                                 expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
 
     return {"access_token": token, "token_type": "bearer"}
