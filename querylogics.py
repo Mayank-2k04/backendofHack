@@ -9,6 +9,7 @@ from createtoken import ACCESS_TOKEN_EXPIRE_MINUTES
 from auth import get_current_user
 import cloudinary.uploader as up
 from pydantic import TypeAdapter
+
 def signup(user: User):
     if users.find_one({"email": user.email}):
         raise HTTPException(status_code=400, detail="Email already registered")
@@ -34,7 +35,6 @@ def login(user : UserLogin):
                                 expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
 
     return {"access_token": token, "token_type": "bearer"}
-
 
 def add_lost_item(
     title: str = Form(...),
@@ -76,7 +76,6 @@ def add_lost_item(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Upload failed: {str(e)}")
 
-
 def add_found_item(
     title: str = Form(...),
     description: str = Form(...),
@@ -111,6 +110,21 @@ def add_found_item(
             "item_id": str(item_id),
             "image_url": image_url
         }
-
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Upload failed: {str(e)}")
+
+def found(current_user: dict = Depends(get_current_user)):
+
+    items = list(found_items.find({"user_id": ObjectId(current_user["_id"])}))
+    for item in items:
+        item["_id"] = str(item["_id"])
+        item["user_id"] = str(item["user_id"])
+    return {"items": items}
+
+def lost(current_user: dict = Depends(get_current_user)):
+
+    items = list(lost_items.find({"user_id": ObjectId(current_user["_id"])}))
+    for item in items:
+        item["_id"] = str(item["_id"])
+        item["user_id"] = str(item["user_id"])
+    return {"items": items}

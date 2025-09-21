@@ -43,3 +43,11 @@ def add_found_item(
     current_user: dict = Depends(get_current_user)
 ):
     return querylogics.add_found_item(title,description,latitude,longitude,file,location,contact,current_user)
+
+@app.get("/my/lost")
+def get_my_lost_items(current_user: dict = Depends(get_current_user)):
+    return querylogics.lost(current_user)
+
+@app.get("/my/found")
+def get_my_found_items(current_user: dict = Depends(get_current_user)):
+    return querylogics.found(current_user)
