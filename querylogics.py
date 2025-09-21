@@ -45,6 +45,7 @@ def add_lost_item(
     longitude: float = Form(...),
     file: UploadFile = File(...),
     location: str = Form(...),
+    contact: str = Form(...),
     current_user: dict = Depends(get_current_user)
 ):
     try:
@@ -60,7 +61,8 @@ def add_lost_item(
             "latitude": latitude,
             "longitude": longitude,
             "image_url": image_url,
-            "location" : location
+            "location" : location,
+            "contact" : contact
         })
 
         # Insert into MongoDB with hardcoded user ID

@@ -16,3 +16,5 @@ class LostItemSchema(BaseModel):
     latitude: float
     longitude: float
     image_url: Optional[str] = None
+    location: str
+    contact: str
