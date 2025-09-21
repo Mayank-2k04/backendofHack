@@ -81,7 +81,7 @@ def delete_item(item_id: str = Form(...)):
 def get_all_found_items():
     return functions.found()
 
-@app.get("/notify-finder")
+@app.post("/notify-finder")
 def notify_finder(
         item_id: str = Form(...),
         finder_email: str = Form(...),
