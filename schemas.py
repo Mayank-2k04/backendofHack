@@ -6,3 +6,6 @@ class User(BaseModel):
     email: EmailStr
     password: str   # later we can hash it
 
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str
