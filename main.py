@@ -29,6 +29,17 @@ async def add_lost(
     contact: str = Form(...),
     current_user: dict = Depends(get_current_user)
 ):
-    return querylogics.add_lost_item(title,description,latitude,longitude,file,location,contact,current_user)
+    return await querylogics.add_lost_item(title,description,latitude,longitude,file,location,contact,current_user)
 
-
+@app.post("/found/add")
+async def add_found_item(
+    title: str = Form(...),
+    description: str = Form(...),
+    latitude: float = Form(...),
+    longitude: float = Form(...),
+    file: UploadFile = File(...),
+    location: str = Form(...),
+    contact: str = Form(...),
+    current_user: dict = Depends(get_current_user)
+):
+    return await querylogics.add_found_item(title,description,latitude,longitude,file,location,contact,current_user)

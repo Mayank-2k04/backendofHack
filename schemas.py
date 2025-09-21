@@ -1,10 +1,10 @@
-from pydantic import BaseModel, EmailStr, Field
-from typing import Optional, List
+from pydantic import BaseModel, EmailStr
+
 
 class User(BaseModel):
     name: str
     email: EmailStr
-    password: str   # later we can hash it
+    password: str
 
 class UserLogin(BaseModel):
     email: EmailStr
@@ -12,9 +12,18 @@ class UserLogin(BaseModel):
 
 class LostItemSchema(BaseModel):
     title: str
-    description: Optional[str]
+    description: str
     latitude: float
     longitude: float
-    image_url: Optional[str] = None
+    image_url: str
+    location: str
+    contact: str
+
+class FoundItemSchema(BaseModel):
+    title: str
+    description: str
+    latitude: float
+    longitude: float
+    image_url: str
     location: str
     contact: str

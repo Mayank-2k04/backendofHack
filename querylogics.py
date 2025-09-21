@@ -1,9 +1,7 @@
-from http.cookiejar import lwp_cookie_str
-
 from bson import ObjectId
 import functions
-from db import users, lost_items
-from schemas import User, UserLogin, LostItemSchema
+from db import users, lost_items, found_items
+from schemas import User, UserLogin, LostItemSchema, FoundItemSchema
 from fastapi import File, UploadFile, Form, Depends, HTTPException
 from createtoken import create_access_token
 from datetime import timedelta
@@ -49,11 +47,11 @@ def add_lost_item(
     current_user: dict = Depends(get_current_user)
 ):
     try:
-        # Upload image to Cloudinary
+
         result = up.upload(file.file)
         image_url = result["secure_url"]
 
-        # Validate data using Pydantic TypeAdapter
+
         adapter = TypeAdapter(LostItemSchema)
         lost_item = adapter.validate_python({
             "title": title,
@@ -65,13 +63,51 @@ def add_lost_item(
             "contact" : contact
         })
 
-        # Insert into MongoDB with hardcoded user ID
+
         item_dict = lost_item.model_dump() | {"user_id": ObjectId(current_user["user_id"])}
         item_id = lost_items.insert_one(item_dict).inserted_id
 
-        # Return JSON-safe response
         return {
             "message": "Lost item added!",
+            "item_id": str(item_id),
+            "image_url": image_url
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Upload failed: {str(e)}")
+
+
+def add_found_item(
+    title: str = Form(...),
+    description: str = Form(...),
+    latitude: float = Form(...),
+    longitude: float = Form(...),
+    file: UploadFile = File(...),
+    location: str = Form(...),
+    contact: str = Form(...),
+    current_user: dict = Depends(get_current_user)
+):
+    try:
+        result = up.upload(file.file)
+        image_url = result["secure_url"]
+
+        adapter = TypeAdapter(FoundItemSchema)
+        found_item = adapter.validate_python({
+            "title": title,
+            "description": description,
+            "latitude": latitude,
+            "longitude": longitude,
+            "image_url": image_url,
+            "location": location,
+            "contact": contact
+        })
+
+
+        item_dict = found_item.model_dump() | {"user_id": ObjectId(current_user["user_id"])}
+        item_id = found_items.insert_one(item_dict).inserted_id
+
+        return {
+            "message": "Found item added!",
             "item_id": str(item_id),
             "image_url": image_url
         }
