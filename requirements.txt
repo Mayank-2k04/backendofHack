@@ -5,4 +5,5 @@ pydantic[email]~=2.11.9
 python-multipart
 passlib~=1.7.4
 bcrypt
-python-jose[cryptography]
+python-jose[cryptography]~=3.5.0
+cloudinary~=1.44.1
