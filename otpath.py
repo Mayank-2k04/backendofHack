@@ -47,7 +47,7 @@ Foundry Team
 
         return {"status" : "Success"}
     except Exception:
-        return {"status" : "Not sent"}
+        raise HTTPException(status_code=400, detail="Not sent")
 
 def verify_any_otp_and_log(ot: str):
 
