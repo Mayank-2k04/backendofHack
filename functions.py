@@ -2,7 +2,7 @@ from passlib.context import CryptContext
 from fastapi import Depends, HTTPException
 from auth import get_current_user
 from bson import ObjectId
-from db import lost_items
+from db import lost_items, found_items
 
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -27,3 +27,14 @@ def delete_i(item_id: str):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error deleting item: {str(e)}")
+
+def found():
+    try:
+        items = list(found_items.find())
+        # Convert ObjectId to string for JSON response
+        for item in items:
+            item["_id"] = str(item["_id"])
+            item["user_id"] = str(item["user_id"]) if "user_id" in item else None
+        return {"found_items": items}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching found items: {str(e)}")

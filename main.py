@@ -77,4 +77,8 @@ def verify_otp(otp: str = Form(...)):
 def delete_item(item_id: str = Form(...)):
     return functions.delete_i(item_id)
 
+@app.get("/found-items")
+def get_all_found_items():
+    return functions.found()
+
 
