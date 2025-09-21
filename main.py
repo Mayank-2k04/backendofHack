@@ -5,6 +5,7 @@ import querylogics
 from auth import get_current_user
 app = FastAPI(title="Campus Safety & Item Recovery")
 from otpath import send_otp_email, verify_any_otp_and_log
+import functions
 
 app.add_middleware(CORSMiddleware,allow_origins=["*"],allow_credentials=True,allow_methods=["*"],allow_headers=["*"])
 @app.post("/signup")
@@ -71,3 +72,9 @@ def send_otp(
 @app.post("/verify-otp")
 def verify_otp(otp: str = Form(...)):
     return verify_any_otp_and_log(otp)
+
+@app.delete("/delete-item")
+def delete_item(item_id: str = Form(...), current_user: dict = Depends(get_current_user)):
+    return functions.delete_i(item_id,current_user)
+
+

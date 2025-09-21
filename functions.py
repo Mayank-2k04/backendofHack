@@ -1,4 +1,8 @@
 from passlib.context import CryptContext
+from fastapi import Depends, HTTPException
+from auth import get_current_user
+from bson import ObjectId
+from db import lost_items
 
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -8,3 +12,19 @@ def hash_password(password: str):
 
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
+
+def delete_i(item_id: str, current_user: dict = Depends(get_current_user)):
+    try:
+        oid = ObjectId(item_id)
+
+        # Delete from both collections (only one will match, but that's fine)
+        lost_result = lost_items.delete_one({"_id": oid, "user_id": ObjectId(current_user["_id"])})
+
+
+        if lost_result.deleted_count == 0:
+            raise HTTPException(status_code=404, detail="Item not found or you don’t have permission to delete it")
+
+        return {"message": "Item deleted successfully", "item_id": item_id}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error deleting item: {str(e)}")
