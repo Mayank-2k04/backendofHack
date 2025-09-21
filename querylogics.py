@@ -1,3 +1,5 @@
+from http.cookiejar import lwp_cookie_str
+
 from bson import ObjectId
 import functions
 from db import users, lost_items
@@ -42,6 +44,7 @@ def add_lost_item(
     latitude: float = Form(...),
     longitude: float = Form(...),
     file: UploadFile = File(...),
+    location: str = Form(...),
     current_user: dict = Depends(get_current_user)
 ):
     try:
@@ -56,7 +59,8 @@ def add_lost_item(
             "description": description,
             "latitude": latitude,
             "longitude": longitude,
-            "image_url": image_url
+            "image_url": image_url,
+            "location" : location
         })
 
         # Insert into MongoDB with hardcoded user ID

@@ -25,8 +25,9 @@ async def add_lost(
     latitude: float = Form(...),
     longitude: float = Form(...),
     file: UploadFile = File(...),
+    location: str = Form(...),
     current_user: dict = Depends(get_current_user)
 ):
-    return querylogics.add_lost_item(title,description,latitude,longitude,file,current_user)
+    return querylogics.add_lost_item(title,description,latitude,longitude,file,location,current_user)
 
 
