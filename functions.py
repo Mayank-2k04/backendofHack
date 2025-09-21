@@ -28,13 +28,16 @@ def delete_i(item_id: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error deleting item: {str(e)}")
 
-def found():
+def found(current_user: dict = Depends(get_current_user)):
     try:
-        items = list(found_items.find())
+        # Exclude items where the finder is the current user
+        items = list(found_items.find({"user_id": {"$ne": ObjectId(current_user["user_id"])}}))
+
         # Convert ObjectId to string for JSON response
         for item in items:
             item["_id"] = str(item["_id"])
             item["user_id"] = str(item["user_id"]) if "user_id" in item else None
+
         return {"found_items": items}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching found items: {str(e)}")

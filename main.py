@@ -78,8 +78,8 @@ def delete_item(item_id: str = Form(...)):
     return functions.delete_i(item_id)
 
 @app.get("/found-items")
-def get_all_found_items():
-    return functions.found()
+def get_all_found_items(current_user: dict = Depends(get_current_user)):
+    return functions.found(current_user)
 
 @app.post("/notify-finder")
 def notify_finder(
