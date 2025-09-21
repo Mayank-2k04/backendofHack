@@ -1,53 +1,69 @@
 import smtplib, ssl
 import random
 import os
-from db import alerts, lost_items, found_items, logs
+from db import alerts, found_items, logs
 from bson import ObjectId
 from datetime import datetime, timedelta, timezone
 from fastapi import HTTPException
+import traceback
 
-host = "smtp.gmail.com"  # Change if using another provider
-port = 465
+ # Change if using another provider
+
 SENDER_EMAIL ="pythonsendsmail8@gmail.com"
-SENDER_PASSWORD = os.getenv("PYTHONEMAILPASS")
+SMTP_HOST = os.getenv("SMTP_HOST", "smtp.gmail.com")
+SMTP_PORT = int(os.getenv("SMTP_PORT", "465"))
+SENDER_PASSWORD = os.getenv("SENDER_PASSWORD")
 
-def send_otp_email(item_id: str,item_name: str,email: str, founder_email: str):
+def send_otp_email(item_id: str, item_name: str, email: str, founder_email: str):
     sslcontext = ssl.create_default_context()
     ot = str(random.randint(100000, 999999))
-    m = f"Your OTP for Exchange is: {ot}. Item : {item_name} Valid for 5 minutes."
+    msg_body = f"Your OTP for Exchange is: {ot}. Item: {item_name} Valid for 10 minutes."
     message = f"""From: Foundry team <{SENDER_EMAIL}>
 To: {email}
 Subject: OTP for Exchange
 
-{m}
+{msg_body}
 Regards,
 Foundry Team
 """
 
     try:
+        try:
+            oid = ObjectId(item_id)
+        except Exception:
+            raise HTTPException(status_code=400, detail="Invalid item_id format")
+
+        # Send email
         expires_at = datetime.now(timezone.utc) + timedelta(minutes=10)
-        with smtplib.SMTP_SSL(host, port, context=sslcontext) as server:
+        with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT, context=sslcontext) as server:
             server.login(SENDER_EMAIL, SENDER_PASSWORD)
             server.sendmail(SENDER_EMAIL, email, message)
+
+        # Save OTP in DB
         alerts.update_one(
-            {"item_id": ObjectId(item_id)},
-            {"$set": {
-                "otp": ot,
-                "expires_at": expires_at,
-                "verified": False
-            },
+            {"item_id": oid},
+            {
+                "$set": {
+                    "otp": ot,
+                    "expires_at": expires_at,
+                    "verified": False,
+                },
                 "$setOnInsert": {
                     "item_name": item_name,
                     "owner_email": email,
-                    "item_id": ObjectId(item_id),
-                    "founder_email": founder_email
-                }},
-            upsert=True
+                    "item_id": oid,
+                    "founder_email": founder_email,
+                },
+            },
+            upsert=True,
         )
 
-        return {"status" : "Success"}
-    except Exception:
-        raise HTTPException(status_code=400, detail="Not sent")
+        return {"status": "success", "otp": ot}  # you may want to remove otp in prod
+    except Exception as e:
+        print("Error in send_otp_email:", e)
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Email not sent: {str(e)}")
+
 
 def verify_any_otp_and_log(ot: str):
 
