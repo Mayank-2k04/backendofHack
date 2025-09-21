@@ -19,7 +19,7 @@ def homepage(current_user: dict = Depends(get_current_user)):
     return current_user
 
 @app.post("/lost/add")
-async def add_lost(
+def add_lost(
     title: str = Form(...),
     description: str = Form(...),
     latitude: float = Form(...),
@@ -29,10 +29,10 @@ async def add_lost(
     contact: str = Form(...),
     current_user: dict = Depends(get_current_user)
 ):
-    return await querylogics.add_lost_item(title,description,latitude,longitude,file,location,contact,current_user)
+    return querylogics.add_lost_item(title,description,latitude,longitude,file,location,contact,current_user)
 
 @app.post("/found/add")
-async def add_found_item(
+def add_found_item(
     title: str = Form(...),
     description: str = Form(...),
     latitude: float = Form(...),
@@ -42,4 +42,4 @@ async def add_found_item(
     contact: str = Form(...),
     current_user: dict = Depends(get_current_user)
 ):
-    return await querylogics.add_found_item(title,description,latitude,longitude,file,location,contact,current_user)
+    return querylogics.add_found_item(title,description,latitude,longitude,file,location,contact,current_user)
