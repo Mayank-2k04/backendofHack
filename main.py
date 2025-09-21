@@ -1,9 +1,10 @@
-from fastapi import FastAPI, Depends, Form, UploadFile, File
+from fastapi import FastAPI, Depends, Form, UploadFile, File, HTTPException
 from schemas import User, UserLogin
 from fastapi.middleware.cors import CORSMiddleware
 import querylogics
 from auth import get_current_user
 app = FastAPI(title="Campus Safety & Item Recovery")
+from otpath import send_otp_email, verify_any_otp_and_log
 
 app.add_middleware(CORSMiddleware,allow_origins=["*"],allow_credentials=True,allow_methods=["*"],allow_headers=["*"])
 @app.post("/signup")
@@ -51,3 +52,19 @@ def get_my_lost_items(current_user: dict = Depends(get_current_user)):
 @app.get("/my/found")
 def get_my_found_items(current_user: dict = Depends(get_current_user)):
     return querylogics.found(current_user)
+
+
+@app.post("/send-otp")
+def send_otp(
+    item_id: str = Form(...),
+    item_name: str = Form(...),
+    owner_email: str = Form(...),
+    current_user: dict = Depends(get_current_user)
+):
+    try:
+        founder_email = current_user["user_email"]
+        result = send_otp_email(item_id, item_name, owner_email, founder_email)
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
