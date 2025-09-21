@@ -115,7 +115,7 @@ def add_found_item(
 
 def found(current_user: dict = Depends(get_current_user)):
 
-    items = list(found_items.find({"user_id": ObjectId(current_user["_id"])}))
+    items = list(found_items.find({"user_id": ObjectId(current_user["user_id"])}))
     for item in items:
         item["_id"] = str(item["_id"])
         item["user_id"] = str(item["user_id"])
@@ -123,7 +123,7 @@ def found(current_user: dict = Depends(get_current_user)):
 
 def lost(current_user: dict = Depends(get_current_user)):
 
-    items = list(lost_items.find({"user_id": ObjectId(current_user["_id"])}))
+    items = list(lost_items.find({"user_id": ObjectId(current_user["user_id"])}))
     for item in items:
         item["_id"] = str(item["_id"])
         item["user_id"] = str(item["user_id"])
