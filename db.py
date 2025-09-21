@@ -13,6 +13,7 @@ alerts = db["alerts"]
 handover_requests = db["handover_requests"]
 chats = db["chats"]
 users = db["users"]
+logs = db["logs"]
 
 if __name__ == "__main__":
     client = MongoClient(MONGO_URI, server_api=ServerApi('1'))
