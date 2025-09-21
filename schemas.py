@@ -27,3 +27,4 @@ class FoundItemSchema(BaseModel):
     image_url: str
     location: str
     contact: str
+    user_email: str
