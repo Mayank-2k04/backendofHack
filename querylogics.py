@@ -98,7 +98,8 @@ def add_found_item(
             "longitude": longitude,
             "image_url": image_url,
             "location": location,
-            "contact": contact
+            "contact": contact,
+            "user_email": current_user["user_email"]
         })
 
 
