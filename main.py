@@ -2,10 +2,21 @@ from fastapi import FastAPI, HTTPException
 from schemas import User
 from db import users
 from passlib.context import CryptContext
+from fastapi.middleware.cors import CORSMiddleware
+
+app = FastAPI(title="Campus Safety & Item Recovery")
+
+# Allow requests from anywhere
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],        # <-- allow all origins
+    allow_credentials=True,
+    allow_methods=["*"],        # GET, POST, PUT, DELETE, etc.
+    allow_headers=["*"],        # Allow all headers
+)
+
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-app = FastAPI()
 
 def hash_password(password: str):
     return pwd_context.hash(password)
