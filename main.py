@@ -74,7 +74,7 @@ def verify_otp(otp: str = Form(...)):
     return verify_any_otp_and_log(otp)
 
 @app.delete("/delete-item")
-def delete_item(item_id: str = Form(...), current_user: dict = Depends(get_current_user)):
-    return functions.delete_i(item_id,current_user)
+def delete_item(item_id: str = Form(...)):
+    return functions.delete_i(item_id)
 
 
