@@ -68,3 +68,6 @@ def send_otp(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.post("/verify-otp")
+def verify_otp(otp: str = Form(...)):
+    return verify_any_otp_and_log(otp)
