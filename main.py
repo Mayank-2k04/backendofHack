@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import querylogics
 from auth import get_current_user
 app = FastAPI(title="Campus Safety & Item Recovery")
-from otpath import send_otp_email, verify_any_otp_and_log
+from otpath import send_otp_email, verify_any_otp_and_log, send_claim_request
 import functions
 
 app.add_middleware(CORSMiddleware,allow_origins=["*"],allow_credentials=True,allow_methods=["*"],allow_headers=["*"])
@@ -80,5 +80,15 @@ def delete_item(item_id: str = Form(...)):
 @app.get("/found-items")
 def get_all_found_items():
     return functions.found()
+
+@app.get("/notify-finder")
+def notify_finder(
+        item_id: str = Form(...),
+        finder_email: str = Form(...),
+        current_user: dict = Depends(get_current_user)
+):
+    claimer_email = current_user["user_email"]
+    return send_claim_request(item_id,claimer_email,finder_email)
+
 
 
